@@ -1,44 +1,49 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 import pickle
-from .utils import clean_data
 import os
+from .utils import clean_data
+import pandas as pd
+import re
 
 model = pickle.load(open("classifier.pkl", "rb"))
 vectorizer = pickle.load(open("vectorizer.pkl", "rb"))
 
+
 def predictions(text):
-    cleaned=clean_data(text)
+    cleaned = clean_data(text)
     vectorized = vectorizer.transform([cleaned])
-    prediction=model.predict(vectorized)[0]
-    return prediction   
-    
+    prediction = model.predict(vectorized)[0]
+    return prediction
+
 class PredictOverview(APIView):
     def post(self, request):
         text = request.data.get("text")
-        prediction=predictions(text)
-        label = "Positive" if prediction == 1 else "Negative"
-        return Response({"prediction": label})
+        prediction = predictions(text)
+        return Response({"prediction": int(prediction)})
 
 class CorrectLabel(APIView):
-    def post(self,request):
+    def post(self, request):
         text = request.data.get("text")
-        feedbackuser =request.data.get("feedbackuser")
-        prediction=predictions(text)
+        label = int(request.data.get("label"))
+        prediction = predictions(text)
 
-        if feedbackuser=="Positive":
-            label=1
+        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        csv_path = os.path.join(BASE_DIR, 'predict', 'amazon.csv')
+        compare_path = os.path.join(BASE_DIR, 'predict', 'compare.csv')
+
+        df = pd.read_csv(csv_path, names=["Text", "label"])
+
+        text = re.sub(r'\s+', ' ', text).strip()
+        if text in df["Text"].values: #textin içinde arama yapıyor
+            return Response({'message': 'Bu kayıt zaten mevcut.'} )
+        
         else:
-            label=0
+            with open(csv_path, "a", encoding="utf-8") as f:
+                f.write(f'"{text}",{label}\n')
 
-        BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) #abspathle kodun olduğu dosyanı dirname ile bir üst pathe cıkıyoruz
-        csv_path = os.path.join(BASE_DIR, 'predict', 'amazon.csv') #bir üst pathdeki dosyanın yolunu alıyor
+            if prediction != label:
+             with open(compare_path, "a", encoding="utf-8") as f:
+                f.write(f'"{text}","{prediction}","{label}"\n')
 
-        with open(csv_path, "a", encoding="utf-8") as f:
-            f.write(f'"{text}",{label}\n')
-        
-        with open("compare.csv","a",encoding="utf-8") as f:
-            f.write(f'"{text}","yanlis tahmin:"{prediction}","dogrusu: {label}"')
-        
-        
-        return Response({"text": text,"label":label})
+        return Response({'message': 'Feedback kaydedildi.'})

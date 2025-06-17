@@ -38,6 +38,9 @@ def clean_data(data):
 
     return clean_data
 
+'''def synonym(words,n):
+    new_words = words.copy()
+    random_word_list = list(set[word for word in words if word not in stop words])'''
 
 
 df=pd.read_csv("amazon.csv")

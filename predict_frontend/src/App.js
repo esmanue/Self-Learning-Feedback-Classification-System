@@ -3,23 +3,42 @@ import axios from 'axios';
 
 function App() {
   const [text, setText] = useState("");
-  const [result, setResult] = useState("");
+  const [result, setResult] = useState(null);  // dikkat: null başlangıç
   const [feedbackuser, setFeedbackUser] = useState("");
+  const [loading, setLoading] = useState(false); // loading state
 
   const handleSubmit = async () => {
+    if (!text.trim()) {
+      alert("Please enter some text first.");
+      return;
+    }
+    setLoading(true);
     try {
-      const response = await axios.post("http://localhost:8000/api/predict/", { text: text });
+      const response = await axios.post("http://localhost:8000/api/predict/", { text });
       setResult(response.data.prediction);
     } catch (error) {
       console.error("Tahmin yapılırken hata oluştu:", error);
     }
+    setLoading(false);
+  };
+
+  const resetForm = () => {
+    setText("");
+    setResult(null);
+    setFeedbackUser("");
   };
 
   const handleFeedback = async () => {
     try {
-      let label = 0;
-      if (feedbackuser === 'Positive') {
-        label = 1;
+      let label;
+
+      if (feedbackuser === "True") {
+        label = result;
+      } else if (feedbackuser === "False") {
+        label = result === 1 ? 0 : 1;
+      } else {
+        alert("Please select feedback.");
+        return;
       }
 
       await axios.post("http://localhost:8000/api/feedback/", {
@@ -28,14 +47,16 @@ function App() {
       });
 
       alert("Feedback sisteme eklendi.");
+      resetForm();
     } catch (error) {
       console.error("Feedback eklenirken hata:", error);
     }
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h2>Student Feedback Sentiment Analysis</h2>
+    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', maxWidth: '600px', margin: 'auto' }}>
+      <h2>Self-Learning-Feedback-Classification-System
+</h2>
 
       <textarea
         rows="5"
@@ -46,19 +67,25 @@ function App() {
       />
       <br />
 
-      <button onClick={handleSubmit}>Predict Sentiment</button>
+      <button onClick={handleSubmit} disabled={loading || !text.trim()}>
+        {loading ? "Predicting..." : "Predict Sentiment"}
+      </button>
 
-      <h3>Model Prediction: {result}</h3>
+      <h3>
+        Model Prediction: {result === null ? "" : (result === 1 ? "Positive" : "Negative")}
+      </h3>
 
-      <div>
-        <h4>If prediction was wrong, give correct one:</h4>
-        <select value={feedbackuser} onChange={(e) => setFeedbackUser(e.target.value)}>
-          <option value="">Select</option>
-          <option value="Positive">Positive</option>
-          <option value="Negative">Negative</option>
-        </select>
-        <button onClick={handleFeedback}>Submit Feedback</button>
-      </div>
+      {result !== null && (
+        <div>
+          <h4>Was the prediction correct?</h4>
+          <select value={feedbackuser} onChange={(e) => setFeedbackUser(e.target.value)}>
+            <option value="">Select</option>
+            <option value="True">Correct</option>
+            <option value="False">Wrong</option>
+          </select>
+          <button onClick={handleFeedback} disabled={!feedbackuser}>Submit Feedback</button>
+        </div>
+      )}
     </div>
   );
 }

@@ -34,7 +34,7 @@ class CorrectLabel(APIView):
 
         df = pd.read_csv(csv_path, names=["Text", "label"])
 
-        text = re.sub(r'\s+', ' ', text).strip()
+        text = re.sub(r'\s+', ' ', text).strip() #ortada bırakılan bosluklar icin stripe re ekledim.
         if text in df["Text"].values: #textin içinde arama yapıyor
             return Response({'message': 'Bu kayıt zaten mevcut.'} )
         

@@ -1,4 +1,4 @@
-# Text Classification and Feedback System
+# Self-Learning-Feedback-Classification-System
 
 This project is a web-based application that classifies text using a machine learning model and allows users to send feedback when the prediction is incorrect. The aim is to create a system that improves over time through real user input.
 

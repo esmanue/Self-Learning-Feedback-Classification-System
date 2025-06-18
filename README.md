@@ -6,12 +6,16 @@ This project is a web-based application that classifies text using a machine lea
 
 ## 🔧 Features
 
+## 🔧 Features
+
 - Text classification using a trained machine learning model
 - Feedback mechanism to correct wrong predictions
-- Backend with Django REST Framework
+- Backend with Django REST Framework  
+  > ⚠️ Before running the backend or frontend, make sure to run the training script (e.g. `overview.py`) to generate the `classifier.pkl` and `vectorizer.pkl` files.
 - Simple frontend built with React
 - Cleaned and vectorized text using TF-IDF
 - Feedback stored for future model updates
+
 
 ---
 

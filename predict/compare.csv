@@ -1,9 +1,0 @@
-Text,Predict,label
-"Absolutely fantastic... if you enjoy endless bugs and crashes.","1","0"
-"I was ready to return it, but surprisingly, it turned out to be better than I thought.","0","1"
-"Oh great, another feature that doesn’t work as advertised. Wonderful!","1","0"
-"Exactly what I needed — another useless feature that never works.","1","0"
-
-"The product arrived defective and I am not satisfied.","1","0"
-"The product arrived defective and    I am not satisfied.","1","0"
-"The product arrived defective and      I am not satisfied.","1","0"
